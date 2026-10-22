@@ -135,9 +135,10 @@ await proxy.start();                 // 在 http://127.0.0.1:<端口> 上提供�
 cd example
 flutter pub get
 # 安卓 TV（32 位 armeabi-v7a，很多 VIDAA / 老安卓电视都是这个）
-flutter build apk --target-platform android-arm --release --flavor tv
+# 注意 IS_TV=true：隐藏首页网址输入框，只留 FTP 媒体库 + 设置
+flutter build apk --target-platform android-arm --release --flavor tv --dart-define=IS_TV=true
 # 手机（arm64）
-flutter build apk --target-platform android-arm64 --release --flavor phone
+flutter build apk --target-platform android-arm64 --release --flavor phone --dart-define=IS_TV=false
 
 adb install -r build/app/outputs/flutter-apk/app-tv-release.apk
 ```
@@ -150,8 +151,8 @@ adb install -r build/app/outputs/flutter-apk/app-tv-release.apk
    （NAS 上需要一个 `_map.txt` 索引；没有也能自动扫描目录，见 `docs/nas-setup.md`）
 3. 进入播放后用方向键**选集**、调倍速、全屏、续播。
 
-> 注：首页另有一个"贴 m3u8 网址播放"的输入框，那是给**手机/电脑端**随手贴链接用的。
-> 电视上用遥控器打字很反人类，**看电视正常根本用不到它**——只看第 2 步的媒体库即可。
+> 注：首页那个"贴 m3u8 网址播放"的输入框，是给**手机/电脑端**随手贴链接用的；
+> **电视版 APK（构建时传 `IS_TV=true`）已直接隐藏它**，用遥控器打字太反人类。看电视只看第 2 步的媒体库即可。
 
 ---
 

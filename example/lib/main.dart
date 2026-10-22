@@ -59,6 +59,8 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    // 电视版构建时传 --dart-define=IS_TV=true，隐藏反人类的网址输入框
+    const isTv = bool.fromEnvironment('IS_TV', defaultValue: false);
     return Scaffold(
       appBar: AppBar(title: const Text('HLS Web Player')),
       body: Padding(
@@ -66,23 +68,25 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            TextField(
-              controller: _urlCtl,
-              decoration: InputDecoration(
-                labelText: 'HLS (m3u8) 地址',
-                border: const OutlineInputBorder(),
-                errorText: _err,
+            if (!isTv) ...[
+              TextField(
+                controller: _urlCtl,
+                decoration: InputDecoration(
+                  labelText: 'HLS (m3u8) 地址',
+                  border: const OutlineInputBorder(),
+                  errorText: _err,
+                ),
+                keyboardType: TextInputType.url,
+                onSubmitted: (_) => _playUrl(),
               ),
-              keyboardType: TextInputType.url,
-              onSubmitted: (_) => _playUrl(),
-            ),
-            const SizedBox(height: 12),
-            FilledButton.icon(
-              onPressed: _playUrl,
-              icon: const Icon(Icons.play_arrow),
-              label: const Text('播放地址'),
-            ),
-            const SizedBox(height: 12),
+              const SizedBox(height: 12),
+              FilledButton.icon(
+                onPressed: _playUrl,
+                icon: const Icon(Icons.play_arrow),
+                label: const Text('播放地址'),
+              ),
+              const SizedBox(height: 12),
+            ],
             FilledButton.icon(
               onPressed: () => Navigator.of(context).push(MaterialPageRoute(
                 builder: (_) => FtpLibraryPage(
