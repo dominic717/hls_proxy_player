@@ -1,6 +1,6 @@
 # hls_proxy_player
 
-[![CI](https://github.com/REPLACE_ME/hls_proxy_player/actions/workflows/ci.yml/badge.svg)](https://github.com/REPLACE_ME/hls_proxy_player/actions)
+[![CI](https://github.com/dominic717/hls_proxy_player/actions/workflows/ci.yml/badge.svg)](https://github.com/dominic717/hls_proxy_player/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Flutter](https://img.shields.io/badge/Flutter-3.47.7-blue.svg)](https://flutter.dev)
 

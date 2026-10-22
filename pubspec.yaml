@@ -2,9 +2,9 @@ name: hls_proxy_player
 description: Zero-media-server Android TV NAS player + reusable local-proxy HLS library (on-the-fly AES-128 decrypt & merge).
 publish_to: 'none' # 发布到 pub.dev 时改为对应 URL
 # 发布前请把下面三个 URL 替换成你的真实仓库地址
-repository: https://github.com/REPLACE_ME/hls_proxy_player
-homepage: https://github.com/REPLACE_ME/hls_proxy_player#readme
-issue_tracker: https://github.com/REPLACE_ME/hls_proxy_player/issues
+repository: https://github.com/dominic717/hls_proxy_player
+homepage: https://github.com/dominic717/hls_proxy_player#readme
+issue_tracker: https://github.com/dominic717/hls_proxy_player/issues
 version: 1.0.0+1
 
 environment:

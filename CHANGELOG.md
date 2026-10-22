@@ -18,4 +18,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Compliance by design**: no site scraping, no private-key extraction, no WAF/TLS-fingerprint bypass, no hard-coded credentials. All config lives in a local `local_config.json` that is never committed.
 - `flutter analyze` is clean (0 issues) for both the library and the example app.
 
-[1.0.0]: https://github.com/REPLACE_ME/hls_proxy_player/releases/tag/v1.0.0
+[1.0.0]: https://github.com/dominic717/hls_proxy_player/releases/tag/v1.0.0
