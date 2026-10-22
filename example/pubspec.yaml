@@ -1,5 +1,5 @@
 name: hls_proxy_player_example
-description: Example Android TV NAS player built on the hls_proxy_player library.
+description: Example Android TV NAS player — watch your own NAS (FTP) videos with zero media server, built on hls_proxy_player.
 publish_to: 'none'
 version: 1.0.0+1
 

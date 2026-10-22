@@ -5,7 +5,7 @@ A small, self-contained **Flutter toolkit** for playing HLS (`m3u8`) streams thr
 PASV **FTP transport** so you can stream your *own* NAS content without ever running a media
 server (no Plex / Jellyfin / Emby).
 
-It ships as:
+It ships as two things:
 
 - 📦 **`hls_proxy_player`** — the reusable library (this repo root `lib/`)
 - 📺 **`example/`** — a ready-to-build **Android TV NAS player** app that consumes the library
@@ -14,12 +14,22 @@ It ships as:
 
 ## Who is this for? (the niche)
 
-You have a NAS at home with your own video files (already split into HLS segments, or served
-as m3u8). You want to watch them on an Android TV **without installing or maintaining a media
+You have a NAS at home with your own video files (already split into HLS segments, or served as
+`m3u8`). You want to watch them on an Android TV **without installing or maintaining a media
 server**. This project is a ~zero-config player: point it at your NAS over FTP (or paste any
-m3u8 URL) and it plays — the decryption/merging all happens locally on the device.
+`m3u8` URL) and it plays — all decryption/merging happens locally on the device.
 
-It is deliberately **not** a scraping/piracy tool: it plays content *you* provide.
+It is deliberately **not** a scraping/piracy tool: it only plays content *you* provide.
+
+---
+
+## Screenshots
+
+| Home | Settings (NAS / FTP) | FTP Library | Player |
+|------|----------------------|-------------|--------|
+| ![Home](docs/screenshots/demo_01_home.png) | ![Settings](docs/screenshots/demo_02_settings.png) | ![FTP Library](docs/screenshots/demo_03_ftp.png) | ![Player](docs/screenshots/demo_04_player.png) |
+
+![Demo](docs/screenshots/demo_nav.gif)
 
 ---
 
@@ -105,7 +115,7 @@ cd example
 flutter pub get
 # Android TV (32-bit armeabi-v7a, e.g. many VIDAA / older Android TVs)
 flutter build apk --target-platform android-arm --release --flavor tv
-# Phone
+# Phone (arm64)
 flutter build apk --target-platform android-arm64 --release --flavor phone
 
 adb install -r build/app/outputs/flutter-apk/app-tv-release.apk
@@ -147,3 +157,14 @@ In the app:
 ## License
 
 [MIT](LICENSE)
+
+---
+
+<details>
+<summary>中文简介</summary>
+
+一个**零媒体服务器**的安卓 TV 私有 NAS 播放方案：通过本地代理 + 边下边 AES-128 解密 + 拼接，
+直接播放你自己的 NAS(FTP) 分片内容，无需 Plex/Jellyfin/Emby。同时把 `local_proxy` + `merger`
+抽成了可复用的 Flutter 库 `hls_proxy_player`。本仓库仅用于播放用户自行拥有合法权利的内容，
+不含任何站点抓取 / 私有密钥提取 / WAF 绕过 / 硬编码凭据。
+</details>
