@@ -63,10 +63,10 @@
 flowchart LR
     subgraph Device["安卓 TV / 手机"]
         UI["播放器界面 (video_player)"]
-        VM["VideoMerger\n下载 → AES-128 解密 → 拼接"]
-        LP["LocalProxy\n在本地起 m3u8 + .ts 服务"]
-        FS["FtpSource\n极简 PASV FTP 客户端"]
-        HF["HttpFetch\n标准 HTTP，内网自签证书可放行"]
+        VM["VideoMerger<br/>下载 → AES-128 解密 → 拼接"]
+        LP["LocalProxy<br/>在本地起 m3u8 + .ts 服务"]
+        FS["FtpSource<br/>极简 PASV FTP 客户端"]
+        HF["HttpFetch<br/>标准 HTTP，内网自签证书可放行"]
     end
 
     NAS["你的 NAS（FTP，私有内网）"]
