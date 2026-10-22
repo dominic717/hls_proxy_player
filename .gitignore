@@ -1,0 +1,35 @@
+# --- Flutter / Dart ---
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+*.iml
+*.log
+
+# --- 本地敏感配置（绝不进版本库）---
+local_config.json
+assets/local_config.json
+*.local.json
+
+# --- 构建产物 / 缓存 ---
+/merged/
+/segments/
+/logs/
+covers/
+
+# --- 平台 ---
+android/.gradle/
+android/app/debug/
+android/app/profile/
+android/app/release/
+ios/Flutter/Flutter.framework/
+ios/Flutter/Flutter.podspec
+ios/Pods/
+**/android/**/gradle-wrapper.jar
+
+# --- 系统 ---
+.DS_Store
+Thumbs.db
