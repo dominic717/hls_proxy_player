@@ -1,5 +1,9 @@
 # hls_proxy_player
 
+[![CI](https://github.com/REPLACE_ME/hls_proxy_player/actions/workflows/ci.yml/badge.svg)](https://github.com/REPLACE_ME/hls_proxy_player/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Flutter](https://img.shields.io/badge/Flutter-3.47.7-blue.svg)](https://flutter.dev)
+
 A small, self-contained **Flutter toolkit** for playing HLS (`m3u8`) streams through a
 **local proxy** that decrypts AES-128 segments and merges them on the fly — plus a minimal
 PASV **FTP transport** so you can stream your *own* NAS content without ever running a media
@@ -20,6 +24,27 @@ server**. This project is a ~zero-config player: point it at your NAS over FTP (
 `m3u8` URL) and it plays — all decryption/merging happens locally on the device.
 
 It is deliberately **not** a scraping/piracy tool: it only plays content *you* provide.
+
+---
+
+## Why not just use Plex / Jellyfin / Emby?
+
+Because they are **media servers** — you install one, point it at your files, manage libraries,
+deal with transcoding, port forwarding, and sometimes a monthly cost. Great software, but heavy
+for one simple need: *"I have videos on my NAS, I want them on the TV."*
+
+This project skips the server entirely:
+
+| | hls_proxy_player | Plex / Jellyfin |
+|---|---|---|
+| Needs a media server | No | Yes |
+| Setup | Fill FTP host + a `_map.txt` (or auto-scan) | Install + configure a library |
+| Where data goes | Stays on your LAN | Server indexes your files |
+| Footprint | One APK on the TV | An always-on service |
+| Best for | "just play my NAS videos on TV" | Large libraries + remote streaming |
+
+Use Plex if you want a full media center. Use this if you want the shortest path from
+"NAS folder" to "TV screen" without standing up any server.
 
 ---
 

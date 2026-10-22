@@ -556,6 +556,17 @@ class FtpSource {
         return parts[2];
       }
     }
+    // 兜底：没有 _map.txt 时扫描目录，取首集所在剧目录
+    final scanned = await _scanCatalog();
+    for (final d in scanned) {
+      if (d.id == vid && d.eps.isNotEmpty) {
+        final dir = d.eps.first.dir;
+        final slash = dir.lastIndexOf('/');
+        final path = slash < 0 ? dir : dir.substring(0, slash);
+        _dramaPathCache[vid] = path;
+        return path;
+      }
+    }
     return null;
   }
 
@@ -575,7 +586,19 @@ class FtpSource {
         return '';
       }
     });
-    if (txt.isEmpty) return null;
+    if (txt.isEmpty) {
+      final scanned = await _scanCatalog();
+      for (final d in scanned) {
+        if (d.id == vid) {
+            final m = <int, String>{};
+            for (final e in d.eps) {
+              m[e.ep] = e.dir;
+            }
+            return m;
+        }
+      }
+      return null;
+    }
     _catalogCache.clear();
     for (final line in txt.split('\n')) {
       final t = line.trim();
@@ -614,7 +637,7 @@ class FtpSource {
         return '';
       }
     });
-    if (txt.isEmpty) return const [];
+    if (txt.isEmpty) return await _scanCatalog();
 
     final list = <FtpDrama>[];
     for (final raw in txt.split('\n')) {
@@ -637,6 +660,65 @@ class FtpSource {
     list.sort((a, b) => a.name.compareTo(b.name));
     Dbg.log('[FTP][目录] 解析到 ${list.length} 部剧 (新格式)');
     return list;
+  }
+
+  /// 兜底：没有 _map.txt 时，直接扫 FTP 目录。
+  /// 规则：带 `drama_` 的文件夹当“剧”，里面 `ep` 开头的子文件夹当“集”。
+  /// 尽力而为，任何异常都静默降级为空列表（不影响已有 _map.txt 路径）。
+  Future<List<FtpDrama>> _scanCatalog() async {
+    try {
+      return await _withConn((c) async {
+        final out = <FtpDrama>[];
+        final top = await c.nlst(FtpConfig.root);
+        for (final entry in top) {
+          final rel = entry.trim();
+          if (rel.isEmpty || rel == '.' || rel == '..') continue;
+          final dramaDirs = <String>[];
+          if (RegExp(r'drama_(\d+)', caseSensitive: false).hasMatch(rel)) {
+            dramaDirs.add(rel);
+          } else {
+            // 可能是分类目录（如 xiandai/），里面才有 drama_xxx
+            try {
+              final sub = await c.nlst('${FtpConfig.root}/$rel');
+              for (final s in sub) {
+                if (RegExp(r'drama_(\d+)', caseSensitive: false).hasMatch(s)) {
+                  dramaDirs.add('$rel/$s');
+                }
+              }
+            } catch (_) {}
+          }
+          for (final dd in dramaDirs) {
+            final vidm = RegExp(r'drama_(\d+)', caseSensitive: false).firstMatch(dd);
+            final vid = vidm?.group(1) ?? dd;
+            List<String> epDirs = [];
+            try {
+              final eps = await c.nlst('${FtpConfig.root}/$dd');
+              epDirs = eps
+                  .where((e) => RegExp(r'^ep\d', caseSensitive: false).hasMatch(e.trim()))
+                  .toList()
+                ..sort((a, b) => _epNum(a).compareTo(_epNum(b)));
+            } catch (_) {}
+            if (epDirs.isEmpty) continue;
+            final eps = <FtpEpisode>[
+              for (var i = 0; i < epDirs.length; i++)
+                FtpEpisode(i + 1, '$dd/${epDirs[i]}')
+            ];
+            out.add(FtpDrama(vid, dd, '', eps));
+          }
+        }
+        out.sort((a, b) => a.name.compareTo(b.name));
+        Dbg.log('[FTP][扫描] 兜底扫描到 ${out.length} 部剧');
+        return out;
+      });
+    } catch (e) {
+      Dbg.log('[FTP][扫描] 兜底扫描失败: $e');
+      return const [];
+    }
+  }
+
+  int _epNum(String s) {
+    final m = RegExp(r'(\d+)').firstMatch(s);
+    return m != null ? int.parse(m.group(1)!) : 0;
   }
 
   /// 定位某集目录：cat/drama_vid/ep<ep>_<hash>

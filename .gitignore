@@ -47,3 +47,6 @@ Thumbs.db
 
 # --- demo 截图/录屏产物（不进版本库）---
 /demo_assets/
+
+# --- 发布用 APK 等二进制产物（作为 GitHub Release 资源单独上传，不进 git）---
+/release/
