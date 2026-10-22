@@ -3,7 +3,7 @@
 /// 调用点：SeriesCache/_backgroundCache 下载完成时、播放页解析到该集地址时。
 library;
 
-import 'dbg.dart';
+import 'package:hls_proxy_player/dbg.dart';
 
 class _EpInfo {
   final String hash;

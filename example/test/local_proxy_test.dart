@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hls_web_player/local_proxy.dart';
+import 'package:hls_proxy_player/local_proxy.dart';
 
 void main() {
   group('LocalProxy ⚠️基线（防"null/m3u8"静默失败回归）', () {
@@ -19,7 +19,7 @@ void main() {
     });
 
     test('rewritePlaylist：分片与密钥 URL 全部改写为 /fetch', () {
-      final upstream = '#EXTM3U\n'
+      const upstream = '#EXTM3U\n'
           '#EXT-X-VERSION:3\n'
           '#EXT-X-KEY:METHOD=AES-128,URI="https://cdn.example.com/k.key",'
           'IV=0x0102030405060708090a0b0c0d0e0f10\n'

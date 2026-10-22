@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hls_web_player/episode_verify.dart';
+import 'package:hls_proxy_player_example/episode_verify.dart';
 
 void main() {
   group('EpisodeVerify 集数校验 ⚠️基线', () {

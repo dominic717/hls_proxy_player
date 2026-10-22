@@ -121,13 +121,13 @@ class VideoMerger {
     log('分片数: ${segments.length}, 加密: ${keyUri != null}');
     if (segments.isEmpty) throw Exception('播放列表没有分片');
     _cancelTokens.remove(vid); // 新一次合并清掉旧的取消请求
-    final cancelled = () {
+    bool cancelled() {
       if (_cancelTokens.contains(vid)) {
         log('收到取消请求，终止本次合并');
         return true;
       }
       return false;
-    };
+    }
 
     // 2. AES-128 密钥（一并缓存：m3u8 变了 key 也换，按 vid 存）
     List<int>? key;

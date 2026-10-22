@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.hls_player_app"
+    namespace = "com.example.hls_proxy_player"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -16,7 +16,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.hls_player_app"
+        applicationId = "com.example.hls_proxy_player"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         // TV 硬性要求 minSdk >= 21，显式写死，避免跟随 flutter 默认值漂移
@@ -43,11 +43,11 @@ android {
     productFlavors {
         create("phone") {
             dimension = "device"
-            applicationId = "com.example.hls_player_app"
+            applicationId = "com.example.hls_proxy_player"
         }
         create("tv") {
             dimension = "device"
-            applicationId = "com.example.hls_player_app.tv"
+            applicationId = "com.example.hls_proxy_player.tv"
         }
     }
 }

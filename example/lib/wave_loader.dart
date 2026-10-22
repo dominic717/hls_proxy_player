@@ -42,8 +42,8 @@ class _ShimmerBarState extends State<ShimmerBar>
               widthFactor: 0.42,
               child: Container(
                 height: widget.height,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(colors: [
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(colors: [
                     Colors.white,
                     Colors.black45,
                     Colors.white,

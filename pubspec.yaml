@@ -1,6 +1,6 @@
-name: hls_web_player
-description: 通用 HLS 播放器：播放标准 m3u8 视频，并支持通过本地代理播放用户自有 NAS(FTP) 上的分片内容。
-publish_to: 'none'
+name: hls_proxy_player
+description: Reusable Flutter toolkit that plays HLS/m3u8 through a local proxy with on-the-fly AES-128 decryption and segment merging, plus a minimal PASV FTP transport for streaming your own NAS content without a media server. Ships with an example Android TV NAS player.
+publish_to: 'none' # set to your pub.dev URL when ready to publish
 version: 1.0.0+1
 
 environment:
@@ -10,8 +10,6 @@ dependencies:
   flutter:
     sdk: flutter
   http: ^1.2.0
-  video_player: ^2.8.0
-  sqflite: ^2.3.0
   path_provider: ^2.1.0
   path: ^1.9.0
   pointycastle: ^3.9.1
@@ -21,7 +19,3 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
-
-flutter:
-  uses-material-design: true
-  # 本分支不内置任何站点配置文件（无 assets 依赖）。

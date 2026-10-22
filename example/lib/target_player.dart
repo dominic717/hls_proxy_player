@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
 
-import 'dbg.dart';
+import 'package:hls_proxy_player/dbg.dart';
 import 'tv_keys.dart';
 import 'wave_loader.dart';
 
@@ -624,9 +624,9 @@ class _TargetPlayerState extends State<TargetPlayer>
                     Shortcuts(
                       shortcuts: {
                         LogicalKeySet(LogicalKeyboardKey.arrowLeft):
-                            DirectionalFocusIntent(TraversalDirection.left),
+                            const DirectionalFocusIntent(TraversalDirection.left),
                         LogicalKeySet(LogicalKeyboardKey.arrowRight):
-                            DirectionalFocusIntent(TraversalDirection.right),
+                            const DirectionalFocusIntent(TraversalDirection.right),
                       },
                       child: SizedBox(
                         height: 36,

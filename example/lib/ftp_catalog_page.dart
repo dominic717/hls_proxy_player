@@ -8,7 +8,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'ftp_source.dart';
+import 'package:hls_proxy_player/ftp_source.dart';
 import 'cover_image.dart';
 import 'tv_keys.dart';
 

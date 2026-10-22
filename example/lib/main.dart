@@ -11,8 +11,8 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
 import 'ftp_catalog_page.dart';
-import 'ftp_source.dart';
-import 'local_proxy.dart';
+import 'package:hls_proxy_player/ftp_source.dart';
+import 'package:hls_proxy_player/local_proxy.dart';
 import 'target_player.dart';
 
 void main() async {
@@ -136,7 +136,7 @@ class PlayerScreen extends StatefulWidget {
   final int startEp;
   final String title;
 
-  PlayerScreen.network({super.key, required this.url, required this.title})
+  const PlayerScreen.network({super.key, required this.url, required this.title})
       : drama = null,
         startEp = 1;
 
@@ -168,7 +168,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
     // FTP：经本地代理把内网分片暴露成 m3u8
     final base = await LocalProxy.instance.start();
     final dir = widget.drama!.eps[ep - 1].dir;
-    return '${base}/ftpm3u8?vid=${widget.drama!.id}&ep=$ep&dir=$dir&mode=split';
+    return '$base/ftpm3u8?vid=${widget.drama!.id}&ep=$ep&dir=$dir&mode=split';
   }
 
   Future<void> _init() async {

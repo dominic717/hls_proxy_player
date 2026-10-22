@@ -1,50 +1,148 @@
-# HLS Web Player
+# hls_proxy_player
 
-一个**通用 HLS 播放器** Flutter 应用，支持 Android / Android TV。
+A small, self-contained **Flutter toolkit** for playing HLS (`m3u8`) streams through a
+**local proxy** that decrypts AES-128 segments and merges them on the fly — plus a minimal
+PASV **FTP transport** so you can stream your *own* NAS content without ever running a media
+server (no Plex / Jellyfin / Emby).
 
-本仓库（`hub` 分支）是合规发布的通用版本，仅包含播放引擎，不包含任何站点定向抓取、私有加密破解、WAF 绕过或硬编码凭据。
+It ships as:
 
-## 功能
+- 📦 **`hls_proxy_player`** — the reusable library (this repo root `lib/`)
+- 📺 **`example/`** — a ready-to-build **Android TV NAS player** app that consumes the library
 
-- 播放任意标准 HLS（`m3u8`）地址（用户输入的 URL）。
-- 通过本地代理（`LocalProxy` + 最小 PASV FTP 客户端）播放**用户自有 NAS(FTP)** 上的分片内容，支持按集切换。
-- 可选 AES-128 解密遵循 HLS 标准 `#EXT-X-KEY`（密钥随内容下发），不内置任何第三方静态密钥。
-- 断点续播、历史记录、缓存记录等本地数据库能力。
-- 遥控器（DPad）/ 触摸双兼容的播放器 UI，适配 Android TV。
+---
 
-## 合规说明
+## Who is this for? (the niche)
 
-本项目仅用于播放用户**自行拥有合法权利**的内容。代码不含：
+You have a NAS at home with your own video files (already split into HLS segments, or served
+as m3u8). You want to watch them on an Android TV **without installing or maintaining a media
+server**. This project is a ~zero-config player: point it at your NAS over FTP (or paste any
+m3u8 URL) and it plays — the decryption/merging all happens locally on the device.
 
-- 任何特定站点域名、UA/Referer 伪装、TLS 指纹伪造（如 Cronet 抗封栈）；
-- DoH 换 IP 直连等反爬 / 抗封手段；
-- 从第三方站点提取的静态加密密钥；
-- 源码中硬编码的 NAS 账号密码（凭据保存在本机 `local_config.json`，**不进版本库**）。
+It is deliberately **not** a scraping/piracy tool: it plays content *you* provide.
 
-## 使用
+---
 
-1. 在「设置」页填写你的 NAS / FTP 连接信息（主机、端口、用户名、密码、根目录）。
-2. 首页输入 m3u8 地址可直接播放；或进入「内网 FTP 资源库」浏览 NAS 上的目录（需 `_map.txt` 索引）。
-3. 播放器支持选集、倍速、全屏、断点续播。
+## Architecture
 
-## 构建
+```mermaid
+flowchart LR
+    subgraph Device["Android TV / Phone"]
+        UI["Player UI (video_player)"]
+        VM["VideoMerger\n(download → AES-128 decrypt → concat)"]
+        LP["LocalProxy\n(serves m3u8 + .ts over localhost)"]
+        FS["FtpSource\n(minimal PASV FTP client)"]
+        HF["HttpFetch\n(standard HTTP, LAN self-signed OK)"]
+    end
 
-```bash
-flutter pub get
-# 手机
-flutter build apk
-# Android TV（按你的 productFlavors / 构建脚本而定）
-flutter build apk --target-platform android-arm64
+    NAS["Your NAS (FTP, private LAN)"]
+    NET["Any public/private m3u8 URL"]
+
+    NAS -->|PASV FTP| FS
+    FS --> LP
+    NET -->|HTTP| HF
+    HF --> LP
+    LP -->|clear segment stream| VM
+    VM --> UI
+
+    classDef lib fill:#e8f0fe,stroke:#4285f4;
+    class VM,LP,FS,HF lib;
 ```
 
-## 目录
+The library (`lib/`) is the green box — every component is reusable on its own:
 
-- `lib/main.dart` — 应用入口、首页、播放页、设置页
-- `lib/target_player.dart` — 通用播放器 UI（遥控/触摸双兼容）
-- `lib/ftp_source.dart` — 最小 FTP 客户端与 NAS 目录解析
-- `lib/local_proxy.dart` — 本地代理，把 FTP 分片暴露为 m3u8
-- `lib/merger.dart` — 分片下载 + AES-128 解密 + 拼接
-- `lib/http_fetch.dart` — 标准 HTTP 取流（内网自签证书按私有网段放行）
+| File | Responsibility |
+|------|----------------|
+| `local_proxy.dart` | Local HTTP proxy that exposes NAS/FTP content as a standard m3u8 |
+| `merger.dart` | Downloads segments, decrypts AES-128 on the fly, concatenates to one clear stream |
+| `ftp_source.dart` | Minimal PASV FTP client + NAS directory parsing (`_map.txt`) |
+| `http_fetch.dart` | Standard HTTP fetcher; accepts self-signed certs **only on private LAN ranges** |
+| `crypto_util.dart` | AES-128-CBC helpers (keys delivered via standard `#EXT-X-KEY`) |
+| `policy.dart` / `priority.dart` | Tunable runtime policy constants / task priority queue |
+| `dbg.dart` | Optional debug logging helper |
+
+---
+
+## Compliance
+
+This project is built **only** to play content you have the legal right to access. The code
+contains **none** of the following:
+
+- Any specific site domain, UA/Referer spoofing, or TLS-fingerprint forgery (e.g. Cronet anti-blocking stacks);
+- DoH-based IP-rotation or other anti-crawl / anti-block techniques;
+- Static decryption keys extracted from third-party sites;
+- Hard-coded NAS credentials in source — config lives in a local `local_config.json` that is
+  **never committed** (see `.gitignore`).
+
+AES-128 decryption follows the HLS spec (`#EXT-X-KEY` delivered alongside the content); no
+third-party static key is bundled.
+
+---
+
+## Getting started
+
+### Use the library in your own app
+
+```yaml
+# pubspec.yaml
+dependencies:
+  hls_proxy_player:
+    path: ../hls_proxy_player   # or the pub.dev URL once published
+```
+
+```dart
+import 'package:hls_proxy_player/hls_proxy_player.dart';
+
+final proxy = LocalProxy();
+await proxy.start();                 // serves on http://127.0.0.1:<port>
+// hand proxy.playlistUrl / segment URLs to your video_player controller
+```
+
+### Run / build the example Android TV app
+
+```bash
+cd example
+flutter pub get
+# Android TV (32-bit armeabi-v7a, e.g. many VIDAA / older Android TVs)
+flutter build apk --target-platform android-arm --release --flavor tv
+# Phone
+flutter build apk --target-platform android-arm64 --release --flavor phone
+
+adb install -r build/app/outputs/flutter-apk/app-tv-release.apk
+```
+
+In the app:
+
+1. **Settings** → fill in your NAS/FTP connection (host, port, user, password, root dir).
+2. Home: paste an `m3u8` URL to play directly, or open **FTP Library** to browse your NAS
+   (requires a `_map.txt` index on the NAS).
+3. Player supports episode switching, speed, fullscreen and resume.
+
+---
+
+## Project layout
+
+```
+.
+├── lib/                 # 📦 hls_proxy_player library (the reusable kernel)
+│   ├── hls_proxy_player.dart   # barrel export
+│   ├── local_proxy.dart
+│   ├── merger.dart
+│   ├── ftp_source.dart
+│   ├── http_fetch.dart
+│   ├── crypto_util.dart
+│   ├── policy.dart
+│   ├── priority.dart
+│   └── dbg.dart
+├── example/             # 📺 Android TV NAS player app (consumer of the library)
+│   ├── lib/
+│   ├── android/
+│   └── pubspec.yaml
+├── LICENSE              # MIT
+└── pubspec.yaml         # library package manifest
+```
+
+---
 
 ## License
 

@@ -20,6 +20,17 @@ assets/local_config.json
 /logs/
 covers/
 
+# --- example 子项目(独立 Flutter App) ---
+example/build/
+example/.dart_tool/
+example/.flutter-plugins
+example/.flutter-plugins-dependencies
+example/android/.gradle/
+example/android/app/debug/
+example/android/app/profile/
+example/android/app/release/
+example/pubspec.lock
+
 # --- 平台 ---
 android/.gradle/
 android/app/debug/
@@ -33,3 +44,6 @@ ios/Pods/
 # --- 系统 ---
 .DS_Store
 Thumbs.db
+
+# --- demo 截图/录屏产物（不进版本库）---
+/demo_assets/

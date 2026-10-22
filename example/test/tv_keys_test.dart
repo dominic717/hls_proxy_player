@@ -3,7 +3,7 @@
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hls_web_player/tv_keys.dart';
+import 'package:hls_proxy_player_example/tv_keys.dart';
 
 void main() {
   group('isTvActivateKey', () {
@@ -17,7 +17,7 @@ void main() {
 
     test('VIDAA/Amlogic 自定义 OK 键 (0x10000050c) 识别为激活', () {
       // 构造 keyId=0x10000050c 的键 — 部分国产电视把 OK 映射成这个未登记键
-      final tvOk = LogicalKeyboardKey(kTvOkKeyId);
+      const tvOk = LogicalKeyboardKey(kTvOkKeyId);
       expect(isTvActivateKey(tvOk), isTrue);
     });
 
