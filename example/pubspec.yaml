@@ -11,6 +11,8 @@ dependencies:
     sdk: flutter
   hls_proxy_player:
     path: ../
+  hls_rulegen:
+    git: https://github.com/dominic717/hls_rulegen
   video_player: ^2.8.0
   sqflite: ^2.3.0
   path_provider: ^2.1.0

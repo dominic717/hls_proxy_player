@@ -192,6 +192,8 @@ videoController = VideoPlayerController.network(playUrl);
 
 > 两库的合规边界一致：只处理你**合法拥有 / 有权限**的内容。`hls_rulegen` 内置的是通用抽取引擎（不含任何真实站点规则），本库的 `LocalProxy` 只做标准 HLS 的 AES-128 解密（密钥随 `#EXT-X-KEY` 下发），无任何绕过/伪造类逻辑。
 
+**示例 App 已内置这个入口**：首页（手机/桌面端，非电视）新增一个「播放页地址（自动解析 m3u8）」输入框 + 「解析并播放」按钮——粘贴播放页 URL，App 抓取源码、用 `hls_rulegen` 抽出 m3u8、再经本库 `LocalProxy` 播放。电视端因遥控器打字不便，仍只保留 FTP 媒体库与设置。
+
 ---
 
 ## 目录结构

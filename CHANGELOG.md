@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **示例 App 接入 `hls_rulegen`，实现"实在的配合"**：首页（手机/桌面端）新增「播放页地址（自动解析 m3u8）」输入框 + 「解析并播放」按钮。粘贴播放页 URL → 抓取源码 → 用 `hls_rulegen` 的 `extractM3u8` 抽出 m3u8 → 经本库 `LocalProxy` 重写成本地地址播放。电视端因遥控器打字不便，仍只保留 FTP 媒体库与设置。
+- 示例 App 新增 `test/integration_test.dart`，验证两库链路（hls_rulegen 抽 m3u8 → LocalProxy 转本地地址）。
+- 示例 App `pubspec.yaml` 新增 `hls_rulegen` 依赖。
+
 ## [1.0.0] - 2026-10-22
 
 ### Added

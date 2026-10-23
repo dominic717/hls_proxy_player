@@ -12,7 +12,9 @@ import 'package:video_player/video_player.dart';
 
 import 'ftp_catalog_page.dart';
 import 'package:hls_proxy_player/ftp_source.dart';
+import 'package:hls_proxy_player/http_fetch.dart';
 import 'package:hls_proxy_player/local_proxy.dart';
+import 'package:hls_rulegen/parser.dart';
 import 'target_player.dart';
 
 void main() async {
@@ -44,7 +46,9 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final _urlCtl = TextEditingController();
+  final _pageCtl = TextEditingController();
   String? _err;
+  bool _busy = false;
 
   void _playUrl() {
     final url = _urlCtl.text.trim();
@@ -55,6 +59,79 @@ class _HomePageState extends State<HomePage> {
     Navigator.of(context).push(MaterialPageRoute(
       builder: (_) => PlayerScreen.network(url: url, title: url),
     ));
+  }
+
+  /// 配合 hls_rulegen：粘贴播放页 URL → 抓取 HTML → 抽出 m3u8 → 经本地代理播放。
+  /// 仅用于你**合法有权限**的站点；本方法不含任何站点专属逻辑。
+  Future<void> _parseAndPlay() async {
+    final pageUrl = _pageCtl.text.trim();
+    if (pageUrl.isEmpty) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('请输入播放页地址')));
+      return;
+    }
+    setState(() => _busy = true);
+    try {
+      // 1) 抓取播放页源码（标准 HTTP，内网自签证书仅在私有网段放行）
+      final html = await fetchString(pageUrl);
+      // 2) 通用抽取 m3u8（无规则文件时走通用兜底正则）
+      final urls = extractM3u8(html, url: pageUrl);
+      if (urls.isEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text('未能从页面解析出 m3u8（可能是非常规播放器结构）')));
+        }
+        return;
+      }
+      // 3) 多个则让用户挑一个
+      var chosen = urls.first;
+      if (urls.length > 1) {
+        final picked = await _pickUrl(urls);
+        if (picked == null) return; // 用户取消
+        chosen = picked;
+      }
+      // 4) 经本地代理把上游 m3u8 重写到 127.0.0.1 再播放
+      final proxy = LocalProxy.instance;
+      await proxy.start();
+      final playUrl = proxy.m3u8Url(chosen);
+      if (mounted) {
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (_) => PlayerScreen.network(url: playUrl, title: pageUrl),
+        ));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('解析失败: $e')));
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<String?> _pickUrl(List<String> urls) => showDialog<String>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('选择要播放的 m3u8'),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: urls.length,
+              itemBuilder: (_, i) => ListTile(
+                title: Text(urls[i], style: const TextStyle(fontSize: 12)),
+                onTap: () => Navigator.of(ctx).pop(urls[i]),
+              ),
+            ),
+          ),
+        ),
+      );
+
+  @override
+  void dispose() {
+    _urlCtl.dispose();
+    _pageCtl.dispose();
+    super.dispose();
   }
 
   @override
@@ -84,6 +161,31 @@ class _HomePageState extends State<HomePage> {
                 onPressed: _playUrl,
                 icon: const Icon(Icons.play_arrow),
                 label: const Text('播放地址'),
+              ),
+              const SizedBox(height: 12),
+              const Divider(),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _pageCtl,
+                decoration: const InputDecoration(
+                  labelText: '播放页地址（自动解析 m3u8）',
+                  hintText: '粘贴含 m3u8 的播放页 URL，自动抽取后播放',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.url,
+              ),
+              const SizedBox(height: 12),
+              FilledButton.icon(
+                onPressed: _busy ? null : _parseAndPlay,
+                icon: _busy
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2, color: Colors.white),
+                      )
+                    : const Icon(Icons.auto_awesome),
+                label: Text(_busy ? '解析中…' : '解析并播放'),
               ),
               const SizedBox(height: 12),
             ],
