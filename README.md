@@ -14,6 +14,8 @@
 - 📦 **`hls_proxy_player`** —— 可复用的库（本仓库根目录的 `lib/`）
 - 📺 **`example/`** —— 一个可以直接打包的**安卓 TV 私有 NAS 播放器** App，消费上面的库
 
+👉 如果你的 m3u8 不是来自 NAS，而是**从某个你有权限的播放页里解析出来的**，用配套的 [**`hls_rulegen`**](https://github.com/dominic717/hls_rulegen) 把它抽出来，再把地址交给本库的 `LocalProxy` 播——两个仓库是**一对互补的"自托管 HLS 工具箱"**：`hls_rulegen` 负责"**从哪来**"（解析出 m3u8），本库负责"**怎么播**"。详见下方「配合 hls_rulegen 使用」。
+
 ---
 
 ## 这东西是给谁用的？（先说清楚定位）
@@ -153,6 +155,42 @@ adb install -r build/app/outputs/flutter-apk/app-tv-release.apk
 
 > 注：首页那个"贴 m3u8 网址播放"的输入框，是给**手机/电脑端**随手贴链接用的；
 > **电视版 APK（构建时传 `IS_TV=true`）已直接隐藏它**，用遥控器打字太反人类。看电视只看第 2 步的媒体库即可。
+
+---
+
+## 配合 hls_rulegen 使用（从播放页获得 m3u8）
+
+如果你的 m3u8 **不是**来自 NAS/FTP，而是藏在某个你**有权限**的播放页里，可以用配套的
+[**`hls_rulegen`**](https://github.com/dominic717/hls_rulegen) 把它解析出来，再交给本库的 `LocalProxy` 播。
+两个仓库是上下游关系：
+
+```
+你的播放页 HTML
+   │  hls_rulegen: 用规则抽出 m3u8 地址 (extractM3u8)
+   ▼
+某个上游 m3u8 链接
+   │  hls_proxy_player: 本地代理把分片/AES-128 密钥重写到 127.0.0.1
+   ▼
+本地 m3u8 地址  ──►  video_player 播放
+```
+
+```dart
+// 1) hls_rulegen：从播放页抽出 m3u8（仅限你有权限的站点）
+import 'package:hls_rulegen/parser.dart';
+final urls = extractM3u8(pageHtml, url: pageUrl, templates: myTemplates);
+final upstream = urls.first;
+
+// 2) hls_proxy_player：起本地代理，把上游 m3u8 改写成可播放的本地地址
+import 'package:hls_proxy_player/hls_proxy_player.dart';
+final proxy = LocalProxy.instance;
+await proxy.start();
+final playUrl = proxy.m3u8Url(upstream); // http://127.0.0.1:<port>/m3u8/index.m3u8?u=<编码后的上游地址>
+
+// 3) 交给播放器
+videoController = VideoPlayerController.network(playUrl);
+```
+
+> 两库的合规边界一致：只处理你**合法拥有 / 有权限**的内容。`hls_rulegen` 内置的是通用抽取引擎（不含任何真实站点规则），本库的 `LocalProxy` 只做标准 HLS 的 AES-128 解密（密钥随 `#EXT-X-KEY` 下发），无任何绕过/伪造类逻辑。
 
 ---
 
